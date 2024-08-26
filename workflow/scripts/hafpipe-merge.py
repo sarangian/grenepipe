@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/opt/conda/envs/grenepipe/bin/python3
 
 # =================================================================================================
 #     Merge HAFpipe files for all samples and chromosomes
