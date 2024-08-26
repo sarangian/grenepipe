@@ -1,3 +1,4 @@
+#!/opt/conda/envs/grenepipe/bin/python3
 # Copied from https://github.com/snakemake/snakemake-wrappers/blob/master/bio/multiqc/wrapper.py,
 # respectively (for the exact commit version): https://github.com/snakemake/snakemake-wrappers/blob/d0c7e6894ee33e8bda90e03b157654ff51838876/bio/multiqc/wrapper.py
 
