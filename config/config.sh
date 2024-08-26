@@ -27,7 +27,7 @@ else
 fi
 
 
-echo -e "sample\tunit\tplatform\tfq1\tfq2" > ${DIR}/samples.tsv
+echo "sample\tunit\tplatform\tfq1\tfq2" > ${DIR}/samples.tsv
 for i in `ls ${FASTQ_DIR} | grep -E 'R1'`;do echo $i;done
 echo -n "Please look into the read names and provide the extension after sample name Example: _R1_001.fastq.gz: "
 read R1_extn
