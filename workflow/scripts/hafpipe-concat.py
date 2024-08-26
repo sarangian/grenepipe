@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/opt/conda/envs/grenepipe/bin/python3
 
 # =================================================================================================
 #     Concatenate HAFpipe files for one sample
