@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/opt/conda/envs/grenepipe/bin/python3
 
 # =================================================================================================
 #     Wrapper script to run HAFpipe in Snakemake
