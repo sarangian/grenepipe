@@ -51,7 +51,10 @@ def get_snpeff_db_path():
     if config["params"]["snpeff"]["custom-db-dir"]:
         return config["params"]["snpeff"]["custom-db-dir"]
     else:
-        return os.path.join(get_snpeff_db_download_path(), config["params"]["snpeff"]["name"])
+        return os.path.join(
+            get_snpeff_db_download_path(), 
+            config["params"]["snpeff"]["name"]
+        )
 
 
 # =================================================================================================
