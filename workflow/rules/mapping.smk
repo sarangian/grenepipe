@@ -154,20 +154,19 @@ rule merge_sample_unit_bams:
 
 rule filter_mapped_reads:
     input:
-        "mapping/merged/{sample}.bam",
+        "mapping/merged/{sample}.bam"
     output:
-        (
+        filtered_bam=(
             "mapping/filtered/{sample}.bam"
             if config["settings"]["keep-intermediate"]["mapping"]
             else temp("mapping/filtered/{sample}.bam")
         ),
-        touch("mapping/filtered/{sample}.done"),
+        touch_file=touch("mapping/filtered/{sample}.done")
     params:
-        extra=config["params"]["samtools"]["view"] + " -b",
+        extra=config["params"]["samtools"]["view"] + " -b"
     log:
-        "logs/mapping/samtools-view/{sample}.log",
+        "logs/mapping/samtools-view/{sample}.log"
     conda:
-        # Need our own env again, because of conflicting numpy and pandas version...
         "../envs/samtools.yaml"
     wrapper:
         "0.85.0/bio/samtools/view"
