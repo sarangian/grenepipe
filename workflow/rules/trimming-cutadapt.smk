@@ -2,7 +2,6 @@
 #     Trimming
 # =================================================================================================
 
-
 rule trim_reads_se:
     input:
         unpack(get_fastq),
@@ -22,12 +21,10 @@ rule trim_reads_se:
         "logs/trimming/cutadapt/{sample}-{unit}.log",
     benchmark:
         "benchmarks/trimming/cutadapt/{sample}-{unit}.log"
-    conda:
-        # yet another missing dependency in the original wrapper...
-        "../envs/cutadapt.yaml"
-    wrapper:
-        "0.74.0/bio/cutadapt/se"
-
+    shell:
+        """
+        cutadapt {params.extra} -a {params.adapters} -o {output.fastq} {input} > {output.qc} 2> {log}
+        """
 
 rule trim_reads_pe:
     input:
@@ -53,50 +50,7 @@ rule trim_reads_pe:
         "logs/trimming/cutadapt/{sample}-{unit}.log",
     benchmark:
         "benchmarks/trimming/cutadapt/{sample}-{unit}.log"
-    conda:
-        # yet another missing dependency in the original wrapper...
-        "../envs/cutadapt.yaml"
-    wrapper:
-        "0.74.0/bio/cutadapt/pe"
-
-
-# =================================================================================================
-#     Trimming Results
-# =================================================================================================
-
-
-def get_trimmed_reads(wildcards):
-    """Get trimmed reads of given sample-unit."""
-    if is_single_end(wildcards.sample, wildcards.unit):
-        # single end sample
-        return [
-            "trimming/{sample}-{unit}.fastq.gz".format(sample=wildcards.sample, unit=wildcards.unit)
-        ]
-    elif config["settings"]["merge-paired-end-reads"]:
-        # merged paired-end samples
-        raise Exception(
-            "Trimming tool 'cutadapt' cannot be used with the option 'merge-paired-end-reads'"
-        )
-    else:
-        # paired-end sample
-        return expand(
-            "trimming/{sample}-{unit}.{pair}.fastq.gz",
-            pair=[1, 2],
-            sample=wildcards.sample,
-            unit=wildcards.unit,
-        )
-
-
-def get_trimming_report(sample, unit):
-    """Get the report needed for MultiQC."""
-    if is_single_end(sample, unit):
-        # single end sample
-        return "trimming/" + sample + "-" + unit + ".qc-se.txt"
-    elif config["settings"]["merge-paired-end-reads"]:
-        # merged paired-end samples
-        raise Exception(
-            "Trimming tool 'cutadapt' cannot be used with the option 'merge-paired-end-reads'"
-        )
-    else:
-        # paired-end sample
-        return "trimming/" + sample + "-" + unit + ".qc-pe.txt"
+    shell:
+        """
+        cutadapt {params.extra} -a {params.adapters[0]} -A {params.adapters[1]} -o {output.fastq1} -p {output.fastq2} {input[0]} {input[1]} > {output.qc} 2> {log}
+        """
