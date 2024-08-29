@@ -12,10 +12,8 @@ rule trim_reads_se:
             if config["settings"]["keep-intermediate"]["trimming"]
             else temp("trimming/{sample}-{unit}.fastq.gz")
         ),
-        # trimlog="trimming/{sample}-{unit}-se.trimlog.log"
         touch("trimming/{sample}-{unit}-se.done"),
     params:
-        # extra=lambda w, output: "-trimlog {}".format(output.trimlog),
         extra=config["params"]["trimmomatic"]["se"]["extra"],
         trimmer=config["params"]["trimmomatic"]["se"]["trimmer"],
     threads: config["params"]["trimmomatic"]["threads"]
@@ -23,12 +21,10 @@ rule trim_reads_se:
         "logs/trimming/trimmomatic/{sample}-{unit}.log",
     benchmark:
         "benchmarks/trimming/trimmomatic/{sample}-{unit}.log"
-    conda:
-        # yet another missing dependency in the original wrapper...
-        "../envs/trimmomatic.yaml"
-    wrapper:
-        "v3.13.6/bio/trimmomatic/se"
-
+    shell:
+        """
+        trimmomatic SE -threads {threads} {input} {output} {params.extra} {params.trimmer} > {log} 2>&1
+        """
 
 rule trim_reads_pe:
     input:
@@ -54,22 +50,19 @@ rule trim_reads_pe:
             if config["settings"]["keep-intermediate"]["trimming"]
             else temp("trimming/{sample}-{unit}.2.unpaired.fastq.gz")
         ),
-        # trimlog="trimming/{sample}-{unit}-pe.trimlog.log"
         done=touch("trimming/{sample}-{unit}-pe.done"),
     params:
-        # extra=lambda w, output: "-trimlog {}".format(output.trimlog),
-        extra=config["params"]["trimmomatic"]["se"]["extra"],
+        extra=config["params"]["trimmomatic"]["pe"]["extra"],
         trimmer=config["params"]["trimmomatic"]["pe"]["trimmer"],
     threads: config["params"]["trimmomatic"]["threads"]
     log:
         "logs/trimming/trimmomatic/{sample}-{unit}.log",
     benchmark:
         "benchmarks/trimming/trimmomatic/{sample}-{unit}.log"
-    conda:
-        # yet another missing dependency in the original wrapper...
-        "../envs/trimmomatic.yaml"
-    wrapper:
-        "v3.13.6/bio/trimmomatic/pe"
+    shell:
+        """
+        trimmomatic PE -threads {threads} {input.r1} {input.r2} {output.r1} {output.r1_unpaired} {output.r2} {output.r2_unpaired} {params.extra} {params.trimmer} > {log} 2>&1
+        """
 
 
 # =================================================================================================
