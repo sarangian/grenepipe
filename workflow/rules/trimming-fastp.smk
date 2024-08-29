@@ -2,13 +2,8 @@
 #     Trimming
 # =================================================================================================
 
-
-# The fastp wrapper is different from the other trimming wrappers in the the snakemake wrapper
-# respository, because consistency is just not their strength... So, we have to provide an extra
-# function to unpack the fastq file names into a list for us.
 def unpack_fastp_files(wildcards):
     return list(get_fastq(wildcards).values())
-
 
 rule trim_reads_se:
     input:
@@ -25,13 +20,14 @@ rule trim_reads_se:
     log:
         "logs/trimming/fastp/{sample}-{unit}.log",
     benchmark:
-        "benchmarks/trimming/fastp/{sample}-{unit}.log"
+        "benchmarks/trimming/fastp/{sample}-{unit}.log",
     params:
         extra=config["params"]["fastp"]["se"],
     threads: config["params"]["fastp"]["threads"]
-    wrapper:
-        "0.64.0/bio/fastp"
-
+    shell:
+        """
+        fastp -i {input.sample} -o {output.trimmed} -h {output.html} -j {output.json} {params.extra} > {log} 2>&1
+        """
 
 rule trim_reads_pe:
     input:
@@ -50,20 +46,19 @@ rule trim_reads_pe:
     log:
         "logs/trimming/fastp/{sample}-{unit}.log",
     benchmark:
-        "benchmarks/trimming/fastp/{sample}-{unit}.log"
+        "benchmarks/trimming/fastp/{sample}-{unit}.log",
     params:
         extra=config["params"]["fastp"]["pe"],
     threads: config["params"]["fastp"]["threads"]
-    wrapper:
-        "0.64.0/bio/fastp"
-
+    shell:
+        """
+        fastp -i {input.sample[0]} -I {input.sample[1]} -o {output.trimmed[0]} -O {output.trimmed[1]} -h {output.html} -j {output.json} {params.extra} > {log} 2>&1
+        """
 
 rule trim_reads_pe_merged:
     input:
         sample=unpack_fastp_files,
     output:
-        # Need to leave "trimmed" empty here, so that the wrapper works properly with merged,
-        # so we use "merged" instead, and use it as an extra param.
         merged=(
             "trimming/{sample}-{unit}-merged.fastq.gz"
             if config["settings"]["keep-intermediate"]["trimming"]
@@ -75,7 +70,7 @@ rule trim_reads_pe_merged:
     log:
         "logs/trimming/fastp/{sample}-{unit}.log",
     benchmark:
-        "benchmarks/trimming/fastp/{sample}-{unit}.log"
+        "benchmarks/trimming/fastp/{sample}-{unit}.log",
     params:
         extra=config["params"]["fastp"]["pe"]
         + " --merge --merged_out trimming/{sample}-{unit}-merged.fastq.gz"
@@ -84,14 +79,14 @@ rule trim_reads_pe_merged:
         + " --unpaired1 trimming/{sample}-{unit}-unmerged.unpaired-1.fastq.gz"
         + " --unpaired2 trimming/{sample}-{unit}-unmerged.unpaired-2.fastq.gz",
     threads: config["params"]["fastp"]["threads"]
-    wrapper:
-        "0.64.0/bio/fastp"  # this runs fastp 0.20.0
-
+    shell:
+        """
+        fastp -i {input.sample[0]} -I {input.sample[1]} {params.extra} -h {output.html} -j {output.json} > {log} 2>&1
+        """
 
 # =================================================================================================
 #     Trimming Results
 # =================================================================================================
-
 
 def get_trimmed_reads(wildcards):
     """Get trimmed reads of given sample-unit."""
